@@ -1,0 +1,157 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+%matplotlib inline
+import seaborn as sns
+
+## On accuracy basis, random forest tree model is best model with accuracy around 82%.
+
+tit = pd.read_csv('TITANIC.csv')
+
+tit.head()
+
+tit.info()
+
+tit.describe()
+
+sns.countplot(x='Survived',data=tit)
+
+sns.countplot(x='Pclass',data=tit)
+
+sns.boxplot(y='Fare',data=tit)
+
+##Bivariate analysis
+
+counts = tit.groupby(['Sex','Pclass'],axis = 0)
+counts.size()
+
+tit.isnull().sum()
+
+tit['Embarked']=tit['Embarked'].fillna(value='S')
+## Mode is S as we know 
+
+tit.isnull().sum()
+
+etit = tit.drop(['Cabin'], axis=1)
+etit
+
+etit['Age']=etit['Age'].fillna(value='28')
+
+etit['Age'].describe()
+
+etit.isnull().sum()
+
+## OUTLIERS
+etit['Age'].tail()
+
+etit.boxplot(column = ['Fare'])
+
+etit['Fare'].describe()
+
+IQR = etit['Fare'].quantile(0.75)-etit['Fare'].quantile(0.25)
+print(IQR)
+
+UQuantile = etit['Fare'].quantile(0.75)+1.5*IQR
+LQuantile = etit['Fare'].quantile(0.25)-1.5*IQR
+print(UQuantile)
+print(LQuantile)
+
+Outliervalues = etit[(etit['Fare']>=UQuantile) | (etit['Fare']<=LQuantile)]
+Outliervalues
+
+index = etit[(etit['Fare']>=UQuantile) | (etit['Fare']<=LQuantile)].index
+for i in index:
+    etit['Fare'][i]=etit['Fare'].quantile(0.95)
+    etit['Fare'].describe()
+
+etit['Fare'].describe()
+
+etit.boxplot(column = ['Fare'])
+
+etit['Fare'].quantile(0.95)
+
+eda = etit
+
+obj = eda.dtypes == np.object
+print(obj)
+
+eda.columns[obj]
+
+del eda['Name']
+
+obj = eda.dtypes == np.object
+print(obj)
+
+eda.columns[obj]
+
+dummydf = pd.DataFrame()
+for i in eda.columns[obj]:
+    dummy = pd.get_dummies(eda[i],drop_first = True)
+    dummydf = pd.concat([dummydf,dummy], axis = 1)
+print(dummydf)
+
+eda1 = pd.concat([eda,dummydf], axis=1)
+
+eda1
+
+eda1.drop(['Sex', 'Age', 'Ticket', 'Embarked'],axis =1, inplace= True)
+
+eda2 = pd.get_dummies(eda,drop_first=True)
+
+eda2
+
+## RANDOM FOREST TREE 
+
+
+y=eda2.iloc[:,1].values
+
+y
+
+x=eda2.iloc[:,-775:].values
+
+x
+
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.30, random_state=0)
+
+
+ X_train.shape
+
+
+X_test.shape
+
+
+ y_train.shape
+
+
+ y_test.shape
+
+
+from sklearn.preprocessing import StandardScaler 
+sc_X = StandardScaler() 
+X_train = sc_X.fit_transform(X_train)
+X_test = sc_X.transform(X_test) 
+
+from sklearn.ensemble import RandomForestClassifier 
+clf = RandomForestClassifier(n_estimators = 40, n_jobs= 2, random_state = 0) 
+clf.fit(X_train, y_train)
+
+y_pred = clf.predict(X_test) 
+y_pred 
+
+ y_test 
+
+y_pred 
+
+from sklearn import metrics
+from sklearn.metrics import confusion_matrix 
+
+cm = confusion_matrix(y_test, y_pred)
+
+ cm 
+
+ metrics.accuracy_score(y_test, y_pred)
+
+
+
