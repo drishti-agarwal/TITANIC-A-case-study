@@ -1,2 +1,2 @@
-# TITANIC-A-case-study
+# TITANIC-A-Case-Study
 The dataset that is analyzed holds the details of 899 passengers on board who either survived the disaster or unfortunately died, along with their details. Here we will first study the raw data and convert it into much more usable form through data wrangling, then we will scale the values and encode the character type values of some columns for data visualization and model selection/application.
